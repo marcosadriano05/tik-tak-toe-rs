@@ -54,12 +54,17 @@ impl TikTakToe {
         let mut accumulator_secondary_diagonal = square - 1;
 
         for i in 0..(*square) {
-            let win = self.board[(i * square)..(i * square + square)]
+            let line: Vec<(usize, &Option<char>)> = self.board[(i * square)..(i * square + square)]
                 .iter()
-                .all(|&item| check_eq_from_option_char(&item, &player.value));
+                .enumerate()
+                .map(|(index, item)| (index + i * square, item))
+                .collect();
+            let win = line
+                .iter()
+                .all(|(_, item)| check_eq_from_option_char(item, &player.value));
             if win {
                 return State::Win(WinData {
-                    board_indexes: vec![i * square, i * square + 1, i * square + 2],
+                    board_indexes: line.iter().map(|(index, _)| *index).collect(),
                 });
             }
 
@@ -72,7 +77,7 @@ impl TikTakToe {
                 .all(|&item| check_eq_from_option_char(&self.board[item], &player.value));
             if win {
                 return State::Win(WinData {
-                    board_indexes: vec![i, i + square, i + square + square],
+                    board_indexes: vertical_indexes,
                 });
             }
 
@@ -87,11 +92,7 @@ impl TikTakToe {
             .all(|&item| check_eq_from_option_char(&self.board[item], &player.value));
         if win {
             return State::Win(WinData {
-                board_indexes: vec![
-                    indexes_main_diagonal[0],
-                    indexes_main_diagonal[1],
-                    indexes_main_diagonal[2],
-                ],
+                board_indexes: indexes_main_diagonal,
             });
         }
 
@@ -100,11 +101,7 @@ impl TikTakToe {
             .all(|&item| check_eq_from_option_char(&self.board[item], &player.value));
         if win {
             return State::Win(WinData {
-                board_indexes: vec![
-                    indexes_secondary_diagonal[0],
-                    indexes_secondary_diagonal[1],
-                    indexes_secondary_diagonal[2],
-                ],
+                board_indexes: indexes_secondary_diagonal,
             });
         }
 
