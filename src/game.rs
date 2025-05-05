@@ -45,64 +45,38 @@ impl TikTakToe {
         }
     }
 
-    fn has_win(&self, player: &Player) -> State {
+    fn calculate_state(&self, player: &Player) -> State {
         let square = &self.square;
 
         let mut indexes_main_diagonal = vec![0; *square];
-        let mut accumulator_main_diagonal = 0;
+        let mut current_main_diagonal_index = 0;
         let mut indexes_secondary_diagonal = vec![0; *square];
-        let mut accumulator_secondary_diagonal = square - 1;
+        let mut current_secondary_diagonal_index = square - 1;
 
         for i in 0..(*square) {
-            let line: Vec<(usize, &Option<char>)> = self.board[(i * square)..(i * square + square)]
-                .iter()
-                .enumerate()
-                .map(|(index, item)| (index + i * square, item))
-                .collect();
-            let win = line
-                .iter()
-                .all(|(_, item)| check_eq_from_option_char(item, &player.value));
-            if win {
-                return State::Win(WinData {
-                    board_indexes: line.iter().map(|(index, _)| *index).collect(),
-                });
+            let horizontal_indexes: Vec<usize> = ((i * square)..(i * square + square)).collect();
+            if let Some(value) = self.has_winner(horizontal_indexes, &self.board, player) {
+                return State::Win(value);
             }
 
-            let mut vertical_indexes = Vec::new();
-            for j in 0..(*square) {
-                vertical_indexes.push(j * square + i);
-            }
-            let win = vertical_indexes
-                .iter()
-                .all(|&item| check_eq_from_option_char(&self.board[item], &player.value));
-            if win {
-                return State::Win(WinData {
-                    board_indexes: vertical_indexes,
-                });
+            let vertical_indexes: Vec<usize> =
+                (0..(*square)).map(|item| item * square + i).collect();
+            if let Some(value) = self.has_winner(vertical_indexes, &self.board, player) {
+                return State::Win(value);
             }
 
-            indexes_main_diagonal[i] = accumulator_main_diagonal;
-            accumulator_main_diagonal = accumulator_main_diagonal + square + 1;
-            indexes_secondary_diagonal[i] = accumulator_secondary_diagonal;
-            accumulator_secondary_diagonal = accumulator_secondary_diagonal + square - 1;
+            indexes_main_diagonal[i] = current_main_diagonal_index;
+            current_main_diagonal_index = current_main_diagonal_index + square + 1;
+            indexes_secondary_diagonal[i] = current_secondary_diagonal_index;
+            current_secondary_diagonal_index = current_secondary_diagonal_index + square - 1;
         }
 
-        let win = indexes_main_diagonal
-            .iter()
-            .all(|&item| check_eq_from_option_char(&self.board[item], &player.value));
-        if win {
-            return State::Win(WinData {
-                board_indexes: indexes_main_diagonal,
-            });
+        if let Some(value) = self.has_winner(indexes_main_diagonal, &self.board, player) {
+            return State::Win(value);
         }
 
-        let win = indexes_secondary_diagonal
-            .iter()
-            .all(|&item| check_eq_from_option_char(&self.board[item], &player.value));
-        if win {
-            return State::Win(WinData {
-                board_indexes: indexes_secondary_diagonal,
-            });
+        if let Some(value) = self.has_winner(indexes_secondary_diagonal, &self.board, player) {
+            return State::Win(value);
         }
 
         if self.board.iter().all(|&item| item.is_some()) {
@@ -110,6 +84,24 @@ impl TikTakToe {
         }
 
         State::Continue
+    }
+
+    fn has_winner(
+        &self,
+        indexes: Vec<usize>,
+        board: &[Option<char>],
+        player: &Player,
+    ) -> Option<WinData> {
+        let win = indexes
+            .iter()
+            .all(|&item| check_eq_from_option_char(&board[item], &player.value));
+        if win {
+            return Some(WinData {
+                board_indexes: indexes,
+            });
+        }
+
+        None
     }
 }
 
@@ -142,7 +134,7 @@ mod tests {
         ];
         let player = Player { value: 'O' };
         assert_eq!(
-            game.has_win(&player),
+            game.calculate_state(&player),
             State::Win(WinData {
                 board_indexes: vec![6, 7, 8]
             })
@@ -165,7 +157,7 @@ mod tests {
         ];
         let player = Player { value: 'O' };
         assert_eq!(
-            game.has_win(&player),
+            game.calculate_state(&player),
             State::Win(WinData {
                 board_indexes: vec![0, 3, 6]
             })
@@ -188,7 +180,7 @@ mod tests {
         ];
         let player = Player { value: 'O' };
         assert_eq!(
-            game.has_win(&player),
+            game.calculate_state(&player),
             State::Win(WinData {
                 board_indexes: vec![0, 4, 8]
             })
@@ -211,7 +203,7 @@ mod tests {
         ];
         let player = Player { value: 'O' };
         assert_eq!(
-            game.has_win(&player),
+            game.calculate_state(&player),
             State::Win(WinData {
                 board_indexes: vec![2, 4, 6]
             })
@@ -233,7 +225,7 @@ mod tests {
             Some('O'),
         ];
         let player = Player { value: 'O' };
-        assert_eq!(game.has_win(&player), State::Draw);
+        assert_eq!(game.calculate_state(&player), State::Draw);
     }
 
     #[test]
@@ -241,6 +233,6 @@ mod tests {
         let mut game = TikTakToe::new(3);
         game.board = vec![Some('O'), None, None, None, None, None, None, None, None];
         let player = Player { value: 'O' };
-        assert_eq!(game.has_win(&player), State::Continue);
+        assert_eq!(game.calculate_state(&player), State::Continue);
     }
 }
