@@ -14,9 +14,11 @@ pub struct Player {
     pub value: char,
 }
 
+#[derive(Debug)]
 pub struct TikTakToe {
     square: usize,
     board: Vec<Option<char>>,
+    state: State,
 }
 
 fn check_eq_from_option_char(left: &Option<char>, right: &char) -> bool {
@@ -31,7 +33,12 @@ impl TikTakToe {
         TikTakToe {
             square,
             board: vec![None; square.pow(2)],
+            state: State::Continue,
         }
+    }
+
+    pub fn get_board(&self) -> &Vec<Option<char>> {
+        &self.board
     }
 
     pub fn play_action(&mut self, player: &Player, index: usize) {
@@ -103,6 +110,20 @@ impl TikTakToe {
 
         None
     }
+}
+
+pub fn render(game: &TikTakToe) {
+    let board = game.get_board();
+    let mut display = String::new();
+    let board_size = board.len().isqrt();
+    for i in 0..board_size {
+        ((i * board_size)..(i * board_size + board_size)).for_each(|value| {
+            let value = board[value].unwrap_or(' ').to_string();
+            display.push_str(&format!("|{}|", value));
+        });
+        display.push('\n');
+    }
+    println!("{}", display);
 }
 
 #[cfg(test)]
