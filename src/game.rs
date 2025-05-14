@@ -62,13 +62,13 @@ impl TikTakToe {
 
         for i in 0..(*square) {
             let horizontal_indexes: Vec<usize> = ((i * square)..(i * square + square)).collect();
-            if let Some(value) = self.has_winner(horizontal_indexes, &self.board, player) {
+            if let Some(value) = self.has_winner(horizontal_indexes, player) {
                 return State::Win(value);
             }
 
             let vertical_indexes: Vec<usize> =
                 (0..(*square)).map(|item| item * square + i).collect();
-            if let Some(value) = self.has_winner(vertical_indexes, &self.board, player) {
+            if let Some(value) = self.has_winner(vertical_indexes, player) {
                 return State::Win(value);
             }
 
@@ -78,11 +78,11 @@ impl TikTakToe {
             current_secondary_diagonal_index = current_secondary_diagonal_index + square - 1;
         }
 
-        if let Some(value) = self.has_winner(indexes_main_diagonal, &self.board, player) {
+        if let Some(value) = self.has_winner(indexes_main_diagonal, player) {
             return State::Win(value);
         }
 
-        if let Some(value) = self.has_winner(indexes_secondary_diagonal, &self.board, player) {
+        if let Some(value) = self.has_winner(indexes_secondary_diagonal, player) {
             return State::Win(value);
         }
 
@@ -93,15 +93,10 @@ impl TikTakToe {
         State::Continue
     }
 
-    fn has_winner(
-        &self,
-        indexes: Vec<usize>,
-        board: &[Option<char>],
-        player: &Player,
-    ) -> Option<WinData> {
+    fn has_winner(&self, indexes: Vec<usize>, player: &Player) -> Option<WinData> {
         let win = indexes
             .iter()
-            .all(|&item| check_eq_from_option_char(&board[item], &player.value));
+            .all(|&item| check_eq_from_option_char(&self.board[item], &player.value));
         if win {
             return Some(WinData {
                 board_indexes: indexes,
