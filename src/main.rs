@@ -1,6 +1,7 @@
 mod game;
 
-use game::{Player, TikTakToe, render};
+use game::renderer::render;
+use game::{Player, TikTakToe};
 
 fn main() {
     let mut game = TikTakToe::new(3);
