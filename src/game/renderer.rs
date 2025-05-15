@@ -13,8 +13,8 @@ fn make_display(game: &TikTakToe) -> String {
         State::Win(data) => {
             for i in 0..board_size {
                 ((i * board_size)..(i * board_size + board_size)).for_each(|value| {
+                    let win_position = data.board_indexes.contains(&value);
                     let value = board[value].unwrap_or(' ').to_string();
-                    let win_position = data.board_indexes.contains(&i);
                     let content = if win_position {
                         format!("!{}!", value)
                     } else {

@@ -12,6 +12,7 @@ struct WinData {
     board_indexes: Vec<usize>,
 }
 
+#[derive(PartialEq)]
 pub struct Player {
     pub value: char,
 }
@@ -44,10 +45,15 @@ impl TikTakToe {
     }
 
     pub fn play_action(&mut self, player: &Player, index: usize) {
+        let State::Continue = self.state else {
+            return;
+        };
+
         if let Some(item) = self.board.get_mut(index) {
             match item {
                 None => {
                     *item = Some(player.value);
+                    self.state = self.calculate_state(player);
                 }
                 _ => (),
             }
@@ -120,6 +126,33 @@ mod tests {
         assert_eq!(game.board.iter().all(|&item| item.is_none()), true);
         game.play_action(&player, 3);
         assert_eq!(game.board.get(3), Some(&Some('O')));
+    }
+
+    #[test]
+    fn only_act_if_game_state_is_continue() {
+        let mut game = TikTakToe::new(3);
+        let player = Player { value: 'X' };
+        game.board = vec![
+            Some('X'),
+            Some('O'),
+            Some('O'),
+            None,
+            Some('X'),
+            Some('O'),
+            None,
+            None,
+            None,
+        ];
+        game.play_action(&player, 8);
+        assert_eq!(
+            game.state,
+            State::Win(WinData {
+                board_indexes: vec![0, 4, 8]
+            })
+        );
+        let player = Player { value: 'O' };
+        game.play_action(&player, 3);
+        assert_eq!(game.board.get(3), Some(&None));
     }
 
     #[test]
