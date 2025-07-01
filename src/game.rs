@@ -50,12 +50,9 @@ impl TikTakToe {
         };
 
         if let Some(item) = self.board.get_mut(index) {
-            match item {
-                None => {
-                    *item = Some(player.value);
-                    self.state = self.calculate_state(player);
-                }
-                _ => (),
+            if item.is_none() {
+                *item = Some(player.value);
+                self.state = self.calculate_state(player);
             }
         }
     }

@@ -24,7 +24,7 @@ fn main() {
         }
         let input: usize = match input.parse() {
             Ok(value) => {
-                if value < 1 || value > 9 {
+                if !(1..=9).contains(&value) {
                     println!("Only number between 1 and 9 are allowed.");
                     continue;
                 }
