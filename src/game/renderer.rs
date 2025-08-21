@@ -16,9 +16,9 @@ fn make_display(game: &TikTakToe) -> String {
                     let win_position = data.board_indexes.contains(&value);
                     let value = board[value].unwrap_or(' ').to_string();
                     let content = if win_position {
-                        format!("!{}!", value)
+                        format!("!{value}!")
                     } else {
-                        format!("|{}|", value)
+                        format!("|{value}|")
                     };
                     display.push_str(&content);
                 });
@@ -30,7 +30,7 @@ fn make_display(game: &TikTakToe) -> String {
             for i in 0..board_size {
                 ((i * board_size)..(i * board_size + board_size)).for_each(|value| {
                     let value = board[value].unwrap_or(' ').to_string();
-                    let content = format!("[{}]", value);
+                    let content = format!("[{value}]");
                     display.push_str(&content);
                 });
                 display.push('\n');
@@ -41,7 +41,7 @@ fn make_display(game: &TikTakToe) -> String {
             for i in 0..board_size {
                 ((i * board_size)..(i * board_size + board_size)).for_each(|value| {
                     let value = board[value].unwrap_or(' ').to_string();
-                    display.push_str(&format!("|{}|", value));
+                    display.push_str(&format!("|{value}|"));
                 });
                 display.push('\n');
             }
