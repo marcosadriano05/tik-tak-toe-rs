@@ -1,4 +1,5 @@
-use super::{State, TikTakToe};
+use crate::game::engine::State;
+use crate::game::engine::TikTakToe;
 
 pub fn render(game: &TikTakToe) {
     println!("{}", make_display(game))

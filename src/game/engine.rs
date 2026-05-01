@@ -1,15 +1,13 @@
-pub mod renderer;
-
 #[derive(Debug, PartialEq)]
-enum State {
+pub enum State {
     Win(WinData),
     Draw,
     Continue,
 }
 
 #[derive(Debug, PartialEq)]
-struct WinData {
-    board_indexes: Vec<usize>,
+pub struct WinData {
+    pub board_indexes: Vec<usize>,
 }
 
 #[derive(PartialEq)]
@@ -20,7 +18,7 @@ pub struct Player {
 #[derive(Debug)]
 pub struct TikTakToe {
     board: [Option<bool>; 9],
-    state: State,
+    pub state: State,
 }
 
 impl TikTakToe {

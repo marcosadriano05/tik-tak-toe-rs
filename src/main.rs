@@ -2,8 +2,8 @@ mod game;
 
 use std::io;
 
+use game::engine::{Player, TikTakToe};
 use game::renderer::render;
-use game::{Player, TikTakToe};
 
 fn main() {
     let size = 5;
