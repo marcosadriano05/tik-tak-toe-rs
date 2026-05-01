@@ -14,33 +14,24 @@ struct WinData {
 
 #[derive(PartialEq)]
 pub struct Player {
-    pub value: char,
+    pub value: bool,
 }
 
 #[derive(Debug)]
 pub struct TikTakToe {
-    square: usize,
-    board: Vec<Option<char>>,
+    board: [Option<bool>; 9],
     state: State,
 }
 
-fn check_eq_from_option_char(left: &Option<char>, right: &char) -> bool {
-    match left {
-        Some(v) => v.eq_ignore_ascii_case(right),
-        None => false,
-    }
-}
-
 impl TikTakToe {
-    pub fn new(square: usize) -> Self {
+    pub fn new() -> Self {
         TikTakToe {
-            square,
-            board: vec![None; square.pow(2)],
+            board: [None; 9],
             state: State::Continue,
         }
     }
 
-    pub fn get_board(&self) -> &Vec<Option<char>> {
+    pub fn get_board(&self) -> &[Option<bool>] {
         &self.board
     }
 
@@ -58,21 +49,20 @@ impl TikTakToe {
     }
 
     fn calculate_state(&self, player: &Player) -> State {
-        let square = &self.square;
+        let square = 3;
 
-        let mut indexes_main_diagonal = vec![0; *square];
+        let mut indexes_main_diagonal = vec![0; square];
         let mut current_main_diagonal_index = 0;
-        let mut indexes_secondary_diagonal = vec![0; *square];
+        let mut indexes_secondary_diagonal = vec![0; square];
         let mut current_secondary_diagonal_index = square - 1;
 
-        for i in 0..(*square) {
+        for i in 0..square {
             let horizontal_indexes: Vec<usize> = ((i * square)..(i * square + square)).collect();
             if let Some(value) = self.has_winner(horizontal_indexes, player) {
                 return State::Win(value);
             }
 
-            let vertical_indexes: Vec<usize> =
-                (0..(*square)).map(|item| item * square + i).collect();
+            let vertical_indexes: Vec<usize> = (0..square).map(|item| item * square + i).collect();
             if let Some(value) = self.has_winner(vertical_indexes, player) {
                 return State::Win(value);
             }
@@ -101,7 +91,7 @@ impl TikTakToe {
     fn has_winner(&self, indexes: Vec<usize>, player: &Player) -> Option<WinData> {
         let win = indexes
             .iter()
-            .all(|&item| check_eq_from_option_char(&self.board[item], &player.value));
+            .all(|&item| self.board[item].is_some_and(|x| !(x ^ player.value)));
         if win {
             return Some(WinData {
                 board_indexes: indexes,
@@ -118,24 +108,24 @@ mod tests {
 
     #[test]
     fn user_play_action() {
-        let mut game = TikTakToe::new(3);
-        let player = Player { value: 'O' };
+        let mut game = TikTakToe::new();
+        let player = Player { value: true };
         assert_eq!(game.board.iter().all(|&item| item.is_none()), true);
         game.play_action(&player, 3);
-        assert_eq!(game.board.get(3), Some(&Some('O')));
+        assert_eq!(game.board.get(3), Some(&Some(true)));
     }
 
     #[test]
     fn only_act_if_game_state_is_continue() {
-        let mut game = TikTakToe::new(3);
-        let player = Player { value: 'X' };
-        game.board = vec![
-            Some('X'),
-            Some('O'),
-            Some('O'),
+        let mut game = TikTakToe::new();
+        let player = Player { value: true };
+        game.board = [
+            Some(true),
+            Some(false),
+            Some(false),
             None,
-            Some('X'),
-            Some('O'),
+            Some(true),
+            Some(false),
             None,
             None,
             None,
@@ -147,26 +137,26 @@ mod tests {
                 board_indexes: vec![0, 4, 8]
             })
         );
-        let player = Player { value: 'O' };
+        let player = Player { value: false };
         game.play_action(&player, 3);
         assert_eq!(game.board.get(3), Some(&None));
     }
 
     #[test]
     fn horizontal_win() {
-        let mut game = TikTakToe::new(3);
-        game.board = vec![
-            Some('X'),
-            Some('X'),
-            Some('O'),
-            Some('O'),
-            Some('X'),
-            Some('O'),
-            Some('O'),
-            Some('O'),
-            Some('O'),
+        let mut game = TikTakToe::new();
+        game.board = [
+            Some(true),
+            Some(true),
+            Some(false),
+            Some(false),
+            Some(true),
+            Some(false),
+            Some(false),
+            Some(false),
+            Some(false),
         ];
-        let player = Player { value: 'O' };
+        let player = Player { value: false };
         assert_eq!(
             game.calculate_state(&player),
             State::Win(WinData {
@@ -177,19 +167,19 @@ mod tests {
 
     #[test]
     fn vertical_win() {
-        let mut game = TikTakToe::new(3);
-        game.board = vec![
-            Some('O'),
-            Some('X'),
-            Some('O'),
-            Some('O'),
-            Some('X'),
-            Some('O'),
-            Some('O'),
-            Some('O'),
-            Some('X'),
+        let mut game = TikTakToe::new();
+        game.board = [
+            Some(false),
+            Some(true),
+            Some(false),
+            Some(false),
+            Some(true),
+            Some(false),
+            Some(false),
+            Some(false),
+            Some(true),
         ];
-        let player = Player { value: 'O' };
+        let player = Player { value: false };
         assert_eq!(
             game.calculate_state(&player),
             State::Win(WinData {
@@ -200,19 +190,19 @@ mod tests {
 
     #[test]
     fn main_diagonal_win() {
-        let mut game = TikTakToe::new(3);
-        game.board = vec![
-            Some('O'),
-            Some('X'),
-            Some('O'),
-            Some('O'),
-            Some('O'),
-            Some('X'),
-            Some('X'),
-            Some('O'),
-            Some('O'),
+        let mut game = TikTakToe::new();
+        game.board = [
+            Some(false),
+            Some(true),
+            Some(false),
+            Some(false),
+            Some(false),
+            Some(true),
+            Some(true),
+            Some(false),
+            Some(false),
         ];
-        let player = Player { value: 'O' };
+        let player = Player { value: false };
         assert_eq!(
             game.calculate_state(&player),
             State::Win(WinData {
@@ -223,19 +213,19 @@ mod tests {
 
     #[test]
     fn secondary_diagonal_win() {
-        let mut game = TikTakToe::new(3);
-        game.board = vec![
-            Some('O'),
-            Some('X'),
-            Some('O'),
-            Some('X'),
-            Some('O'),
-            Some('X'),
-            Some('O'),
-            Some('X'),
-            Some('X'),
+        let mut game = TikTakToe::new();
+        game.board = [
+            Some(false),
+            Some(true),
+            Some(false),
+            Some(true),
+            Some(false),
+            Some(true),
+            Some(false),
+            Some(true),
+            Some(true),
         ];
-        let player = Player { value: 'O' };
+        let player = Player { value: false };
         assert_eq!(
             game.calculate_state(&player),
             State::Win(WinData {
@@ -246,27 +236,27 @@ mod tests {
 
     #[test]
     fn draw() {
-        let mut game = TikTakToe::new(3);
-        game.board = vec![
-            Some('O'),
-            Some('O'),
-            Some('X'),
-            Some('X'),
-            Some('X'),
-            Some('O'),
-            Some('O'),
-            Some('X'),
-            Some('O'),
+        let mut game = TikTakToe::new();
+        game.board = [
+            Some(false),
+            Some(false),
+            Some(true),
+            Some(true),
+            Some(true),
+            Some(false),
+            Some(false),
+            Some(true),
+            Some(false),
         ];
-        let player = Player { value: 'O' };
+        let player = Player { value: false };
         assert_eq!(game.calculate_state(&player), State::Draw);
     }
 
     #[test]
     fn continue_game() {
-        let mut game = TikTakToe::new(3);
-        game.board = vec![Some('O'), None, None, None, None, None, None, None, None];
-        let player = Player { value: 'O' };
+        let mut game = TikTakToe::new();
+        game.board = [Some(false), None, None, None, None, None, None, None, None];
+        let player = Player { value: false };
         assert_eq!(game.calculate_state(&player), State::Continue);
     }
 }

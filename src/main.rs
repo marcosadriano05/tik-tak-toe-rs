@@ -8,9 +8,9 @@ use game::{Player, TikTakToe};
 fn main() {
     let size = 5;
     let number_of_boards = size * size;
-    let mut game = TikTakToe::new(size);
-    let player_one = Player { value: 'X' };
-    let player_two = Player { value: 'O' };
+    let mut game = TikTakToe::new();
+    let player_one = Player { value: true };
+    let player_two = Player { value: false };
     let mut current_player = &player_one;
     loop {
         println!("TikTakToe");
