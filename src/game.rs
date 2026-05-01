@@ -40,11 +40,11 @@ impl TikTakToe {
             return;
         };
 
-        if let Some(item) = self.board.get_mut(index) {
-            if item.is_none() {
-                *item = Some(player.value);
-                self.state = self.calculate_state(player);
-            }
+        if let Some(item) = self.board.get_mut(index)
+            && item.is_none()
+        {
+            *item = Some(player.value);
+            self.state = self.calculate_state(player);
         }
     }
 
@@ -89,16 +89,12 @@ impl TikTakToe {
     }
 
     fn has_winner(&self, indexes: Vec<usize>, player: &Player) -> Option<WinData> {
-        let win = indexes
+        indexes
             .iter()
-            .all(|&item| self.board[item].is_some_and(|x| !(x ^ player.value)));
-        if win {
-            return Some(WinData {
+            .all(|&item| self.board[item].is_some_and(|x| !(x ^ player.value)))
+            .then_some(WinData {
                 board_indexes: indexes,
-            });
-        }
-
-        None
+            })
     }
 }
 
